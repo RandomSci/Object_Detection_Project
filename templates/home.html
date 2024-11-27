@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        body {
+            background-color: black;
+        }
+        h1, form, p{
+            text-align: center;
+            color: white;
+        }
+    </style>
+    <h1>{{ Message }}</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="file">Select an image:</label>
+        <input type="file" id="file" name="file" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    {% if result %}
+        <p>{{ result }}</p>
+    {% endif %}
+        
+    {% if img_path %} 
+        <img src="{{ img_path }}" alt="Uploaded Image" style="display:block; margin: 20px auto; max-width: 80%; height: auto;">
+    {% endif %}
+</body>
+</html>
