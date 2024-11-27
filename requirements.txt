@@ -1,0 +1,6 @@
+fastapi[standard]
+ultralytics
+torch
+torchsummary
+torchvision
+opencv-python
