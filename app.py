@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import os
+from torch_snippets import *
 from ultralytics import YOLO
 import cv2
 
@@ -47,5 +48,43 @@ async def upload(request: Request, file: UploadFile = File(...)):
             "Message": "Image Uploaded and Processed!",
             "uploaded_img_path": f"/static/uploaded/{file.filename}",
             "processed_img_path": f"/static/saved/{file.filename}",
+        }
+    )
+
+
+@app.post("/real_time")
+async def upload(request: Request):
+    cam = cv2.VideoCapture(0)
+    cv2.namedWindow("test")
+    img_counter = 0
+
+    while True:
+        ret, frame = cam.read()
+        if not ret:
+            print("failed to grab frame")
+            break
+
+        res = model(frame)[0].plot()
+        cv2.imshow("test", res)
+
+        k = cv2.waitKey(1)
+        if k%256 == 27:
+            print("Escape hit, closing...")
+            break
+        elif k%256 == 32:
+            img_name = "img_{}.png".format(img_counter)
+            img_name = f"static/saved/{img_name}"
+            cv2.imwrite(img_name, frame)
+            show(read(img_name), title="{} written!".format(img_name))
+            img_counter += 1
+
+    cam.release()
+    cv2.destroyAllWindows()
+
+    return templates.TemplateResponse(
+        "home.html",
+        {
+            "request": request,
+            "Ms": "Executed Successfully!"
         }
     )

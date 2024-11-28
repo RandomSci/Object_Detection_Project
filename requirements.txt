@@ -4,3 +4,4 @@ torch
 torchsummary
 torchvision
 opencv-python
+torch_snippets
