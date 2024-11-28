@@ -1,33 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>YOLO Upload</title>
+    <link rel="stylesheet" href="/static/css/home.css">
 </head>
 <body>
-    <style>
-        body {
-            background-color: black;
-        }
-        h1, form, p{
-            text-align: center;
-            color: white;
-        }
-    </style>
     <h1>{{ Message }}</h1>
     <form action="/upload" method="post" enctype="multipart/form-data">
-        <label for="file">Select an image:</label>
-        <input type="file" id="file" name="file" accept="image/*" required>
+        <input type="file" name="file">
         <button type="submit">Upload</button>
     </form>
-
-    {% if result %}
-        <p>{{ result }}</p>
+    {% if uploaded_img_path %}
+    <h2>Uploaded Image:</h2>
+    <img src="{{ uploaded_img_path }}" alt="Uploaded Image" style="max-width: 500px;">
     {% endif %}
-        
-    {% if img_path %} 
-        <img src="{{ img_path }}" alt="Uploaded Image" style="display:block; margin: 20px auto; max-width: 80%; height: auto;">
+    {% if processed_img_path %}
+    <h2>Processed Image:</h2>   
+    <img src="{{ processed_img_path }}" alt="Processed Image" style="max-width: 500px;">
     {% endif %}
 </body>
 </html>
