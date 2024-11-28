@@ -56,7 +56,7 @@ async def upload(request: Request, file: UploadFile = File(...)):
 async def upload(request: Request):
     cam = cv2.VideoCapture(0)
     cv2.namedWindow("test")
-    img_counter = 0
+    img_counter = 0     
 
     while True:
         ret, frame = cam.read()
