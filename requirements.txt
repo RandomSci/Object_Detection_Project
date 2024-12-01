@@ -1,7 +1,10 @@
-fastapi[standard]
+fastapi["standard"]
 ultralytics
 torch
 torchsummary
 torchvision
 opencv-python
 torch_snippets
+scikit-image
+uvicorn
+gunicorn

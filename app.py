@@ -1,14 +1,20 @@
-from fastapi import FastAPI, File, UploadFile, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-import os
+from fastapi import FastAPI, File, UploadFile, Request #type:ignore
+from fastapi.responses import HTMLResponse #type:ignore
+from fastapi.templating import Jinja2Templates #type:ignore
+from fastapi.staticfiles import StaticFiles #type:ignore
 from torch_snippets import *
+from skimage.transform import resize 
 from ultralytics import YOLO
+import numpy as np 
 import cv2
+import datetime
+import random
+import os
 
 app = FastAPI()
 model = YOLO("yolo11n.pt")
+model2 = YOLO("yolo11n-seg.pt")
+
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -88,3 +94,74 @@ async def upload(request: Request):
             "Ms": "Executed Successfully!"
         }
     )
+    
+@app.post("/real_time2")
+async def upload(request: Request):
+    cam = cv2.VideoCapture(0) 
+
+    alpha = 0.5 
+
+    class_colors = {
+        "person": [0, 0, 255], 
+        'cell phone': [0, 255, 0], 
+        "chair": [255, 0, 0],  
+    }
+
+    def get_class_color(class_name):
+        return class_colors.get(class_name, [random.randint(0, 255) for _ in range(3)])
+
+    while True:
+        ret, frame = cam.read()  
+        if not ret:
+            print("Cam not found")
+            break
+
+        frame_resized = cv2.resize(frame, (1024, 768))  
+
+        res = model2(frame_resized)[0]  
+
+        if res.masks is not None and len(res.masks) > 0:
+            highlighted_frame = frame.copy() 
+
+            for i in range(len(res.masks)):
+                mask = res.masks.data[i].cpu().numpy() 
+                mask_binary = (mask > 0).astype(int)  
+
+                mask_resized = resize(mask_binary, (frame.shape[0], frame.shape[1]), mode='reflect', anti_aliasing=True)
+
+                class_idx = int(res.boxes[i].cls)
+                class_name = res.names[class_idx]  
+
+
+                color = get_class_color(class_name)  
+                mask_colored = np.zeros_like(frame)  
+                mask_colored[mask_resized > 0] = color  
+
+                highlighted_frame[mask_resized > 0] = cv2.addWeighted(frame, 1 - alpha, mask_colored, alpha, 0)[mask_resized > 0]
+
+            cv2.imshow('Camera', highlighted_frame)
+        else:
+            cv2.imshow('Camera', frame)
+
+        key = cv2.waitKey(1) & 0xFF
+
+        if key == 27:
+            break
+
+        if key == ord(" "): 
+            filename = f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png'
+            cv2.imwrite(f'static\saved\{filename}', frame)
+            cv2.imshow('Saved', frame)
+            #show(read(f'static\saved\{filename}'))
+            print(f"Image saved as {filename}")
+
+    cam.release()
+    cv2.destroyAllWindows()
+
+    return templates.TemplateResponse(  
+            "home.html",
+            {
+                "request": request,
+                "Ms2": "Executed Successfully!"
+            }
+        )
