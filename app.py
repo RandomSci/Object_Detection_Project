@@ -60,7 +60,7 @@ async def upload(request: Request, file: UploadFile = File(...)):
 
 @app.post("/real_time")
 async def upload(request: Request):
-    cam = cv2.VideoCapture(0)
+    cam = cv2.VideoCapture(2)
     cv2.namedWindow("test")
     img_counter = 0     
 
@@ -97,7 +97,7 @@ async def upload(request: Request):
     
 @app.post("/real_time2")
 async def upload(request: Request):
-    cam = cv2.VideoCapture(0) 
+    cam = cv2.VideoCapture(2) 
 
     alpha = 0.5 
 
